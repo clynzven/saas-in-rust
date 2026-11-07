@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update jobs set done_at = now(), payload = payload - 'cancel_token' where id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cc6d9a9953f63c8971156de1e277e7803c19c17d228c6bc69e91baef40161c58"
+}

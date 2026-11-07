@@ -1,0 +1,14 @@
+<tr id="booking-{{ b.id }}">
+  <td>{{ self.when(b.starts_at) }}</td><td>{{ b.service }}</td><td>{{ b.staff }}</td>
+  <td>{{ b.customer_name }}<br><span class="muted">{{ b.customer_email }}</span></td>
+  <td>
+    {% if b.status == "confirmed" && b.upcoming %}
+    <form method="post" action="/app/{{ org.slug }}/bookings/{{ b.id }}/cancel" class="inline"
+          hx-post="/app/{{ org.slug }}/bookings/{{ b.id }}/cancel" hx-target="#booking-{{ b.id }}" hx-swap="outerHTML"
+          hx-confirm="Cancel this booking?">
+      <span class="pill">confirmed</span> <button class="ghost">Cancel</button>
+    </form>
+    {% else if b.status == "confirmed" %}<span class="pill">confirmed</span>
+    {% else %}<span class="pill cancelled">cancelled</span>{% endif %}
+  </td>
+</tr>

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "with updated as (\n           update bookings set status = 'cancelled' where id = $1 and org_id = $2 and starts_at > now() returning *\n         )\n         select b.id, b.starts_at, s.name as service, u.name as staff, b.customer_name, b.customer_email, b.status,\n                b.starts_at > now() as \"upcoming!\"\n           from updated b join services s on s.id = b.service_id join users u on u.id = b.staff_id",
+  "query": "select b.id, b.starts_at, s.name as service, u.name as staff, b.customer_name, b.customer_email, b.status,\n                b.starts_at > now() as \"upcoming!\"\n           from bookings b join services s on s.id = b.service_id join users u on u.id = b.staff_id\n          where b.org_id = $1 and b.ends_at > now() - interval '1 day'\n          order by b.starts_at\n          limit 200",
   "describe": {
     "columns": [
       {
@@ -46,7 +46,6 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid",
         "Uuid"
       ]
     },
@@ -61,5 +60,5 @@
       null
     ]
   },
-  "hash": "526978790f691116145d1b819cebc7a4c6ab1c32eb0ccb47664ee447199fdc63"
+  "hash": "452ca0178b721e8f466a97c8b7250dfc3ba4e566ee30c02305c1a44b04de6791"
 }

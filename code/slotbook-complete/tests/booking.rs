@@ -1,64 +1,14 @@
 mod common;
 
 use axum::http::StatusCode;
-use chrono::{Days, Utc};
-use common::TestApp;
+use common::{TestApp, local_day, three_days_out_at_10};
 use sqlx::PgPool;
 use uuid::Uuid;
-
-/// An owner whose business is open every day 09:00-17:00 with a 30-minute haircut.
-async fn open_business(app: &TestApp) -> (String, Uuid) {
-    let ana = app.owner_with_business().await;
-    let mut form = vec![];
-    for d in 0..7 {
-        form.push((format!("open_{d}"), "on".to_string()));
-        form.push((format!("opens_{d}"), "09:00".to_string()));
-        form.push((format!("closes_{d}"), "17:00".to_string()));
-    }
-    let form: Vec<(&str, &str)> = form.iter().map(|(k, v)| (k.as_str(), v.as_str())).collect();
-    app.post_form("/app/kape-barbers/hours", &form, Some(&ana))
-        .await;
-    app.post_form(
-        "/app/kape-barbers/services",
-        &[
-            ("name", "Haircut"),
-            ("duration_minutes", "30"),
-            ("price", "35"),
-        ],
-        Some(&ana),
-    )
-    .await;
-    let id = sqlx::query_scalar("select id from services")
-        .fetch_one(&app.db)
-        .await
-        .unwrap();
-    (ana, id)
-}
-
-/// 10:00 in Auckland, three days from now, as RFC 3339.
-fn three_days_out_at_10() -> String {
-    let day = Utc::now()
-        .with_timezone(&chrono_tz::Pacific::Auckland)
-        .date_naive()
-        + Days::new(3);
-    let local = day.and_hms_opt(10, 0, 0).unwrap();
-    slotbook::availability::to_utc(chrono_tz::Pacific::Auckland, local)
-        .unwrap()
-        .to_rfc3339()
-}
-
-/// The calendar day in Auckland for an RFC 3339 instant.
-fn local_day(rfc3339: &str) -> String {
-    let t: chrono::DateTime<Utc> = rfc3339.parse().unwrap();
-    t.with_timezone(&chrono_tz::Pacific::Auckland)
-        .date_naive()
-        .to_string()
-}
 
 #[sqlx::test]
 async fn public_page_lists_active_services(db: PgPool) {
     let app = TestApp::new(db);
-    open_business(&app).await;
+    common::open_business(&app).await;
     let page = app.get("/b/kape-barbers").await;
     assert_eq!(page.status, StatusCode::OK);
     assert!(page.body.contains("Haircut") && page.body.contains("30 min · $35.00"));
@@ -67,7 +17,7 @@ async fn public_page_lists_active_services(db: PgPool) {
 #[sqlx::test]
 async fn customer_books_a_slot(db: PgPool) {
     let app = TestApp::new(db.clone());
-    let (_, service) = open_business(&app).await;
+    let (_, service) = common::open_business(&app).await;
     let start = three_days_out_at_10();
 
     let res = app
@@ -101,7 +51,7 @@ async fn customer_books_a_slot(db: PgPool) {
 #[sqlx::test]
 async fn htmx_date_change_returns_only_the_times(db: PgPool) {
     let app = TestApp::new(db);
-    let (_, service) = open_business(&app).await;
+    let (_, service) = common::open_business(&app).await;
     let req = axum::http::Request::get(format!("/b/kape-barbers/{service}"))
         .header("hx-request", "true")
         .body(axum::body::Body::empty())
@@ -113,7 +63,7 @@ async fn htmx_date_change_returns_only_the_times(db: PgPool) {
 #[sqlx::test]
 async fn twenty_customers_one_slot_one_winner(db: PgPool) {
     let app = TestApp::new(db.clone());
-    let (_, service) = open_business(&app).await;
+    let (_, service) = common::open_business(&app).await;
     let start = three_days_out_at_10();
     let path = format!("/b/kape-barbers/{service}/book");
 
@@ -152,7 +102,7 @@ async fn twenty_customers_one_slot_one_winner(db: PgPool) {
 #[sqlx::test]
 async fn second_staff_member_takes_the_second_booking(db: PgPool) {
     let app = TestApp::new(db.clone());
-    let (ana, service) = open_business(&app).await;
+    let (ana, service) = common::open_business(&app).await;
     app.signup("Ben", "ben@example.com").await;
     app.post_form(
         "/app/kape-barbers/team",
@@ -181,7 +131,7 @@ async fn second_staff_member_takes_the_second_booking(db: PgPool) {
 #[sqlx::test]
 async fn times_outside_opening_hours_are_refused(db: PgPool) {
     let app = TestApp::new(db);
-    let (_, service) = open_business(&app).await;
+    let (_, service) = common::open_business(&app).await;
     let start = three_days_out_at_10().replace("T", " ");
     let early = start.replacen(&start[11..13], "15", 1); // 15:00 UTC is ~3-4 am in Auckland
     let early = early.replace(" ", "T");
@@ -198,7 +148,7 @@ async fn times_outside_opening_hours_are_refused(db: PgPool) {
 #[sqlx::test]
 async fn staff_see_and_cancel_bookings(db: PgPool) {
     let app = TestApp::new(db.clone());
-    let (ana, service) = open_business(&app).await;
+    let (ana, service) = common::open_business(&app).await;
     let start = three_days_out_at_10();
     app.post_form(
         &format!("/b/kape-barbers/{service}/book"),
@@ -243,7 +193,7 @@ async fn staff_see_and_cancel_bookings(db: PgPool) {
 #[sqlx::test]
 async fn the_booked_page_hides_the_email(db: PgPool) {
     let app = TestApp::new(db);
-    let (_, service) = open_business(&app).await;
+    let (_, service) = common::open_business(&app).await;
     let start = three_days_out_at_10();
     let res = app
         .post_form(
@@ -264,7 +214,7 @@ async fn the_booked_page_hides_the_email(db: PgPool) {
 #[sqlx::test]
 async fn staff_cannot_cancel_past_bookings(db: PgPool) {
     let app = TestApp::new(db.clone());
-    let (ana, _) = open_business(&app).await;
+    let (ana, _) = common::open_business(&app).await;
     let id: Uuid = sqlx::query_scalar(
         "insert into bookings (org_id, service_id, staff_id, customer_name, customer_email, starts_at, ends_at)
          select s.org_id, s.id, m.user_id, 'Past', 'past@example.com', now() - interval '2 hours', now() - interval '90 minutes'

@@ -17,6 +17,7 @@ use crate::availability::{self, Busy, Slot};
 use crate::catalog::format_price;
 use crate::error::{AppError, AppResult};
 use crate::forms;
+use crate::jobs::{self, Job};
 use crate::orgs::Org;
 use crate::web::{is_htmx, render};
 
@@ -345,6 +346,7 @@ pub async fn book(
             )
         })?;
 
+    let (cancel_token, cancel_hash) = crate::auth::new_token();
     let mut tx = state.db.begin().await?;
     let mut booked = None;
     for staff_id in &slot.free_staff {
@@ -362,8 +364,9 @@ pub async fn book(
         .execute(&mut *attempt)
         .await?;
         let inserted = sqlx::query_scalar!(
-            "insert into bookings (org_id, service_id, staff_id, customer_name, customer_email, starts_at, ends_at)
-             values ($1, $2, $3, $4, $5, $6, $7) returning id",
+            "insert into bookings (org_id, service_id, staff_id, customer_name, customer_email,
+                                   starts_at, ends_at, cancel_token_hash)
+             values ($1, $2, $3, $4, $5, $6, $7, $8) returning id",
             org.id,
             service.id,
             staff_id,
@@ -371,6 +374,7 @@ pub async fn book(
             email,
             slot.start,
             slot.end,
+            cancel_hash,
         )
         .fetch_one(&mut *attempt)
         .await;
@@ -392,6 +396,15 @@ pub async fn book(
             "Sorry, someone booked that time a moment ago. Please pick another.".into(),
         ));
     };
+    // Same transaction: the booking and its confirmation email commit together.
+    jobs::enqueue(
+        &mut tx,
+        &Job::BookingConfirmation {
+            booking_id,
+            cancel_token,
+        },
+    )
+    .await?;
     tx.commit().await?;
 
     tracing::info!(%booking_id, org = %org.slug, "booking confirmed");
@@ -511,10 +524,13 @@ pub async fn cancel_by_staff(
         .timezone
         .parse()
         .map_err(|_| anyhow::anyhow!("bad time zone"))?;
+    let mut tx = state.db.begin().await?;
     let b = sqlx::query_as!(
         BookingRow,
         "with updated as (
-           update bookings set status = 'cancelled' where id = $1 and org_id = $2 and starts_at > now() returning *
+           update bookings set status = 'cancelled'
+            where id = $1 and org_id = $2 and status = 'confirmed' and starts_at > now()
+           returning *
          )
          select b.id, b.starts_at, s.name as service, u.name as staff, b.customer_name, b.customer_email, b.status,
                 b.starts_at > now() as \"upcoming!\"
@@ -522,9 +538,11 @@ pub async fn cancel_by_staff(
         id,
         org.id,
     )
-    .fetch_optional(&state.db)
+    .fetch_optional(&mut *tx)
     .await?
     .ok_or(AppError::NotFound)?;
+    jobs::enqueue(&mut tx, &Job::BookingCancelled { booking_id: id }).await?;
+    tx.commit().await?;
     tracing::info!(booking_id = %id, by = %org.user.id, "booking cancelled by staff");
     if is_htmx(&headers) {
         Ok(render(BookingRowFragment { org, tz, b })?.into_response())

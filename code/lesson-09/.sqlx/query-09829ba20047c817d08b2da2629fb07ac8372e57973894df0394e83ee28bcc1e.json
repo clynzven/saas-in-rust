@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "update jobs set attempts = attempts + 1, run_at = now() + interval '5 minutes'\n          where id in (\n            select id from jobs\n             where done_at is null and run_at <= now() and attempts < $1\n             order by run_at\n             limit 10\n             for update skip locked)\n         returning id, payload, attempts",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "payload",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 2,
+        "name": "attempts",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "09829ba20047c817d08b2da2629fb07ac8372e57973894df0394e83ee28bcc1e"
+}

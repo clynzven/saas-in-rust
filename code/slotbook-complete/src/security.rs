@@ -31,9 +31,22 @@ pub async fn same_origin_only(State(state): State<AppState>, req: Request, next:
     match origin {
         Some(o) if o == ours || o.starts_with(&format!("{ours}/")) => next.run(req).await,
         _ => {
-            tracing::warn!(?origin, path = %req.uri().path(), "blocked cross-origin request");
+            tracing::warn!(
+                ?origin,
+                path = loggable_path(req.uri().path()),
+                "blocked cross-origin request"
+            );
             AppError::Forbidden.into_response()
         }
+    }
+}
+
+/// The path to write in logs. Cancel links carry a secret, so it's left out.
+pub fn loggable_path(path: &str) -> &str {
+    if path.starts_with("/cancel/") {
+        "/cancel/[secret]"
+    } else {
+        path
     }
 }
 
@@ -159,6 +172,12 @@ mod tests {
         assert!(!rl.allow("a"));
         std::thread::sleep(Duration::from_millis(25));
         assert!(rl.allow("a"));
+    }
+
+    #[test]
+    fn secrets_stay_out_of_logs() {
+        assert_eq!(loggable_path("/cancel/abc123"), "/cancel/[secret]");
+        assert_eq!(loggable_path("/b/kape-barbers"), "/b/kape-barbers");
     }
 
     #[test]

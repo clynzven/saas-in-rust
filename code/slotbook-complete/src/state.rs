@@ -4,6 +4,7 @@ use std::time::Duration;
 use sqlx::PgPool;
 
 use crate::config::Config;
+use crate::mail::Mailer;
 use crate::security::RateLimiter;
 
 /// Everything a request handler might need. Cloning is cheap:
@@ -16,15 +17,17 @@ pub struct AppState {
     pub login_limiter: Arc<RateLimiter>,
     /// Logins, sign-ups and team invites per network (or per user).
     pub ip_limiter: Arc<RateLimiter>,
+    pub mailer: Mailer,
 }
 
 impl AppState {
-    pub fn new(db: PgPool, config: Config) -> Self {
+    pub fn new(db: PgPool, config: Config, mailer: Mailer) -> Self {
         Self {
             db,
             config: Arc::new(config),
             login_limiter: Arc::new(RateLimiter::new(5, Duration::from_secs(15 * 60))),
             ip_limiter: Arc::new(RateLimiter::new(30, Duration::from_secs(15 * 60))),
+            mailer,
         }
     }
 }

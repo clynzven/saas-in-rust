@@ -1,0 +1,20 @@
+{% extends "public.html" %}
+{% block title %}Your booking · {{ org_name }}{% endblock %}
+{% block content %}
+<h1>{{ service }} at {{ org_name }}</h1>
+<p class="lead">{{ when }}</p>
+{% match state %}
+{% when CancelState::CanCancel %}
+  <form method="post" action="/cancel/{{ token }}">
+    <button class="danger">Cancel this booking</button>
+  </form>
+{% when CancelState::JustCancelled %}
+  <div class="flash ok">Your booking is cancelled. We've emailed you a confirmation.</div>
+  <p><a class="btn" href="/b/{{ org_slug }}">Book another time</a></p>
+{% when CancelState::AlreadyCancelled %}
+  <div class="flash error">This booking was already cancelled.</div>
+  <p><a class="btn" href="/b/{{ org_slug }}">Book another time</a></p>
+{% when CancelState::InThePast %}
+  <div class="flash error">This booking has already started, so it can't be cancelled online. Please contact {{ org_name }}.</div>
+{% endmatch %}
+{% endblock %}

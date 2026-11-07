@@ -4,12 +4,15 @@ mod accounts;
 pub mod auth;
 pub mod availability;
 mod booking;
+mod cancel;
 mod catalog;
 pub mod config;
 mod dashboard;
 pub mod db;
 pub mod error;
 pub mod forms;
+pub mod jobs;
+pub mod mail;
 mod orgs;
 mod pages;
 pub mod security;
@@ -62,6 +65,7 @@ pub fn app(state: AppState) -> Router {
             get(booking::book_page).post(booking::book),
         )
         .route("/b/{slug}/booked/{id}", get(booking::booked))
+        .route("/cancel/{token}", get(cancel::show).post(cancel::confirm))
         .route("/app/{slug}/team", get(orgs::team).post(orgs::add_member))
         .route(
             "/app/{slug}/team/{user_id}/remove",

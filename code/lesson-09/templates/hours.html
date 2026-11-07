@@ -1,0 +1,24 @@
+{% extends "org.html" %}
+{% block title %}Opening hours · {{ org.name }}{% endblock %}
+{% block page %}
+<h1>Opening hours</h1>
+<p class="lead">In your business's time zone ({{ org.timezone }}). Customers only see times inside these hours.</p>
+{% block section %}
+<form id="hours" class="card" method="post" action="/app/{{ org.slug }}/hours"
+      hx-post="/app/{{ org.slug }}/hours" hx-target="#hours" hx-swap="outerHTML">
+  {% if let Some((ok, text)) = message %}<div class="flash {% if *ok %}ok{% else %}error{% endif %}">{{ text }}</div>{% endif %}
+  <table>
+    <tr><th>Day</th><th>Open</th><th>From</th><th>To</th></tr>
+    {% for d in days %}
+    <tr>
+      <td>{{ d.name }}</td>
+      <td><input type="checkbox" name="open_{{ d.weekday }}" aria-label="Open on {{ d.name }}"{% if d.open %} checked{% endif %}{% if !org.is_owner() %} disabled{% endif %}></td>
+      <td><input type="time" name="opens_{{ d.weekday }}" value="{{ d.opens }}"{% if !org.is_owner() %} disabled{% endif %}></td>
+      <td><input type="time" name="closes_{{ d.weekday }}" value="{{ d.closes }}"{% if !org.is_owner() %} disabled{% endif %}></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% if org.is_owner() %}<p><button>Save hours</button></p>{% endif %}
+</form>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select b.id, b.status, b.starts_at, s.name as service, o.name as org_name, o.slug as org_slug, o.timezone\n           from bookings b join services s on s.id = b.service_id join organizations o on o.id = b.org_id\n          where b.cancel_token_hash = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "starts_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "service",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "org_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "org_slug",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "timezone",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "55bd651bc2ec9815f969078afe52165b2625d41d266819ae3157671f4972b7ec"
+}
