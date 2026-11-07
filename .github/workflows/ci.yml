@@ -1,0 +1,64 @@
+name: CI
+
+# Builds and tests every lesson folder and the finished app.
+# code/slotbook-complete/.github/workflows/ci.yml is the app's own pipeline
+# from lesson 12 (image build and deploy); GitHub only runs this top-level one.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: ${{ matrix.folder }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        folder:
+          - lesson-01
+          - lesson-02
+          - lesson-03
+          - lesson-04
+          - lesson-05
+          - lesson-06
+          - lesson-07
+          - lesson-08
+          - lesson-09
+          - lesson-10
+          - lesson-11
+          - lesson-12
+          - slotbook-complete
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 2s --health-timeout 5s --health-retries 30
+    defaults:
+      run:
+        working-directory: code/${{ matrix.folder }}
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/slotbook
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: code/${{ matrix.folder }}
+      - name: Install sqlx-cli
+        if: hashFiles(format('code/{0}/migrations/**', matrix.folder)) != ''
+        run: cargo install sqlx-cli --version 0.8.6 --no-default-features --features postgres,rustls --locked
+      - name: Create and migrate the database
+        if: hashFiles(format('code/{0}/migrations/**', matrix.folder)) != ''
+        run: sqlx database create && sqlx migrate run
+      - name: Build
+        run: cargo build --all-targets --locked
+      - name: Tests
+        run: cargo test --all-targets --locked
