@@ -1,0 +1,14 @@
+    <tr id="service-{{ s.id }}">
+      <td>{{ s.name }}</td><td>{{ s.duration_minutes }} min</td><td>{{ s.price() }}</td>
+      <td>
+        {% if org.is_owner() %}
+        <form method="post" action="/app/{{ org.slug }}/services/{{ s.id }}/toggle"
+              hx-post="/app/{{ org.slug }}/services/{{ s.id }}/toggle" hx-target="#service-{{ s.id }}" hx-swap="outerHTML" class="inline">
+          <button class="ghost">{% if s.active %}On · turn off{% else %}Off · turn on{% endif %}</button>
+        </form>
+        {% else %}
+        <span class="pill{% if !s.active %} cancelled{% endif %}">{% if s.active %}on{% else %}off{% endif %}</span>
+        {% endif %}
+      </td>
+    </tr>
+    

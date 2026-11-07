@@ -3,4 +3,8 @@
 {% block page %}
 <h1>{{ org.name }}</h1>
 <p class="lead">Time zone: {{ org.timezone }} · {{ members }} team member{% if members != 1 %}s{% endif %}</p>
+<div class="grid">
+  <a class="card" href="/app/{{ org.slug }}/bookings"><strong>Bookings</strong><br><span class="muted">See and manage what's coming up</span></a>
+  <a class="card" href="/b/{{ org.slug }}"><strong>Your booking page</strong><br><span class="muted">/b/{{ org.slug }}</span></a>
+</div>
 {% endblock %}

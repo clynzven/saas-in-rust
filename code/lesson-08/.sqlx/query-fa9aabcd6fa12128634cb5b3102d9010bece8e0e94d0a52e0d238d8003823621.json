@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into bookings (org_id, service_id, staff_id, customer_name, customer_email, starts_at, ends_at)\n             values ($1, $2, $3, $4, $5, $6, $7) returning id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "fa9aabcd6fa12128634cb5b3102d9010bece8e0e94d0a52e0d238d8003823621"
+}

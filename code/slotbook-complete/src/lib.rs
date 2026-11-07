@@ -3,6 +3,7 @@
 mod accounts;
 pub mod auth;
 pub mod availability;
+mod booking;
 mod catalog;
 pub mod config;
 mod dashboard;
@@ -49,6 +50,18 @@ pub fn app(state: AppState) -> Router {
             "/app/{slug}/hours",
             get(catalog::hours).post(catalog::save_hours),
         )
+        .route("/app/{slug}/bookings", get(booking::bookings))
+        .route(
+            "/app/{slug}/bookings/{id}/cancel",
+            post(booking::cancel_by_staff),
+        )
+        .route("/b/{slug}", get(booking::org_page))
+        .route("/b/{slug}/{service_id}", get(booking::service_page))
+        .route(
+            "/b/{slug}/{service_id}/book",
+            get(booking::book_page).post(booking::book),
+        )
+        .route("/b/{slug}/booked/{id}", get(booking::booked))
         .route("/app/{slug}/team", get(orgs::team).post(orgs::add_member))
         .route(
             "/app/{slug}/team/{user_id}/remove",

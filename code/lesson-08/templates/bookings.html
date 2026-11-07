@@ -1,0 +1,12 @@
+{% extends "org.html" %}
+{% block title %}Bookings · {{ org.name }}{% endblock %}
+{% block page %}
+<h1>Bookings</h1>
+<p class="lead">Upcoming, in {{ org.timezone }}. Your booking page: <a href="/b/{{ org.slug }}">/b/{{ org.slug }}</a></p>
+<table>
+  <tr><th>When</th><th>Service</th><th>With</th><th>Customer</th><th>Status</th></tr>
+  {% for b in rows %}{% include "booking_row.html" %}{% else %}
+  <tr><td colspan="5" class="muted">No bookings yet. Share your booking page to get started.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

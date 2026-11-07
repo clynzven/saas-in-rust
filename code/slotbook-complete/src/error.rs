@@ -17,6 +17,8 @@ pub enum AppError {
     BadRequest(String),
     #[error("{0}")]
     Conflict(String),
+    #[error("we're very busy right now, please try again in a moment")]
+    Unavailable,
     #[error(transparent)]
     Internal(#[from] anyhow::Error),
 }
@@ -25,6 +27,8 @@ impl From<sqlx::Error> for AppError {
     fn from(e: sqlx::Error) -> Self {
         match e {
             sqlx::Error::RowNotFound => AppError::NotFound,
+            // Every connection is in use: say "try again" instead of "broken".
+            sqlx::Error::PoolTimedOut => AppError::Unavailable,
             other => AppError::Internal(other.into()),
         }
     }
@@ -57,6 +61,7 @@ impl IntoResponse for AppError {
             AppError::Forbidden => (StatusCode::FORBIDDEN, "No access"),
             AppError::BadRequest(_) => (StatusCode::BAD_REQUEST, "Something's not right"),
             AppError::Conflict(_) => (StatusCode::CONFLICT, "That didn't work"),
+            AppError::Unavailable => (StatusCode::SERVICE_UNAVAILABLE, "Busy right now"),
             AppError::Internal(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong"),
         };
         let message = match &self {
