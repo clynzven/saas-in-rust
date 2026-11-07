@@ -196,8 +196,7 @@ async fn signups_are_rate_limited_per_network(db: PgPool) {
 #[sqlx::test]
 async fn adding_members_is_rate_limited(db: PgPool) {
     let app = TestApp::new(db);
-    let ana = app.signup("Ana", "ana@example.com").await;
-    create_org(&app, &ana, "Kape Barbers", "kape-barbers").await;
+    let ana = app.owner_with_business().await;
     for i in 0..30 {
         let email = format!("nobody{i}@example.com");
         app.post_form(

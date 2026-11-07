@@ -2,6 +2,7 @@
 
 mod accounts;
 pub mod auth;
+mod catalog;
 pub mod config;
 mod dashboard;
 pub mod db;
@@ -35,6 +36,18 @@ pub fn app(state: AppState) -> Router {
         .route("/orgs/new", get(orgs::new_page))
         .route("/orgs", post(orgs::create))
         .route("/app/{slug}", get(orgs::home))
+        .route(
+            "/app/{slug}/services",
+            get(catalog::services).post(catalog::add_service),
+        )
+        .route(
+            "/app/{slug}/services/{id}/toggle",
+            post(catalog::toggle_service),
+        )
+        .route(
+            "/app/{slug}/hours",
+            get(catalog::hours).post(catalog::save_hours),
+        )
         .route("/app/{slug}/team", get(orgs::team).post(orgs::add_member))
         .route(
             "/app/{slug}/team/{user_id}/remove",

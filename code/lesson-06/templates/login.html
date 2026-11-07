@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Log in · Slotbook{% endblock %}
+{% block content %}
+<h1>Welcome back</h1>
+{% if let Some(e) = error %}<div class="flash error">{{ e }}</div>{% endif %}
+<form class="stack" method="post" action="/login">
+  <label>Email <input name="email" type="email" value="{{ email }}" required autocomplete="email"></label>
+  <label>Password <input name="password" type="password" required autocomplete="current-password"></label>
+  <button>Log in</button>
+  <p class="muted">New here? <a href="/signup">Create an account</a></p>
+</form>
+{% endblock %}

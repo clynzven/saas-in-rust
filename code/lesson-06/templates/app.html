@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block nav %}
+  <a href="/dashboard">Dashboard</a>
+  <span class="muted">{{ user.name }}</span>
+  <form method="post" action="/logout" class="inline"><button class="ghost">Log out</button></form>
+{% endblock %}

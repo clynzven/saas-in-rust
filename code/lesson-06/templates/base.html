@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- htmx: no inline styles (our CSP forbids them), and swap 422 responses so
+       validation errors appear in place. Other 4xx/5xx are treated as errors. -->
+  <meta name="htmx-config" content='{"includeIndicatorStyles": false, "responseHandling": [{"code": "204", "swap": false}, {"code": "[23]..", "swap": true}, {"code": "422", "swap": true}, {"code": "[45]..", "swap": false, "error": true}]}'>
+  <title>{% block title %}Slotbook{% endblock %}</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx-2.0.4.min.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="logo" href="/">slot<span>book</span></a>
+      <nav>{% block nav %}<a href="/login">Log in</a> <a class="btn" href="/signup">Start free</a>{% endblock %}</nav>
+    </div>
+  </header>
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="wrap">Slotbook · online booking for small businesses</footer>
+</body>
+</html>

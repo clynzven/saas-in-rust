@@ -126,3 +126,36 @@ pub fn session_cookie(res: &TestResponse) -> String {
         .unwrap();
     set.split(';').next().unwrap().to_string()
 }
+
+impl TestApp {
+    /// Same as post_form, but marked as an HTMX request.
+    pub async fn htmx_post(&self, path: &str, form: &[(&str, &str)], cookie: &str) -> TestResponse {
+        let body = serde_urlencoded::to_string(form).unwrap();
+        let req = Request::post(path)
+            .header(header::CONTENT_TYPE, "application/x-www-form-urlencoded")
+            .header(header::ORIGIN, "http://localhost:3000")
+            .header(header::COOKIE, cookie)
+            .header("hx-request", "true")
+            .body(Body::from(body))
+            .unwrap();
+        self.send(req).await
+    }
+
+    /// A signed-up owner with a business called "Kape Barbers" (slug kape-barbers).
+    pub async fn owner_with_business(&self) -> String {
+        let cookie = self.signup("Ana", "ana@example.com").await;
+        let res = self
+            .post_form(
+                "/orgs",
+                &[
+                    ("name", "Kape Barbers"),
+                    ("slug", "kape-barbers"),
+                    ("timezone", "Pacific/Auckland"),
+                ],
+                Some(&cookie),
+            )
+            .await;
+        assert_eq!(res.status, StatusCode::SEE_OTHER);
+        cookie
+    }
+}
