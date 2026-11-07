@@ -14,7 +14,10 @@ async fn main() -> Result<()> {
     db::migrate(&pool).await?;
     tracing::info!("database migrated");
 
-    let state = AppState { db: pool, config: Arc::new(config.clone()) };
+    let state = AppState {
+        db: pool,
+        config: Arc::new(config.clone()),
+    };
     let listener = tokio::net::TcpListener::bind(config.bind_addr).await?;
     tracing::info!(addr = %config.bind_addr, "listening");
     axum::serve(listener, slotbook::app(state)).await?;

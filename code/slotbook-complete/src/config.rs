@@ -37,7 +37,12 @@ impl Config {
             "pretty" => LogFormat::Pretty,
             other => anyhow::bail!("LOG_FORMAT must be json or pretty, not {other:?}"),
         };
-        Ok(Self { bind_addr, database_url, base_url, log_format })
+        Ok(Self {
+            bind_addr,
+            database_url,
+            base_url,
+            log_format,
+        })
     }
 }
 

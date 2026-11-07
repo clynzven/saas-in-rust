@@ -19,7 +19,12 @@ async fn setup(db: &PgPool) -> (Uuid, Uuid, Uuid) {
     (user, org, service)
 }
 
-async fn book(db: &PgPool, ids: (Uuid, Uuid, Uuid), start: &str, end: &str) -> Result<(), sqlx::Error> {
+async fn book(
+    db: &PgPool,
+    ids: (Uuid, Uuid, Uuid),
+    start: &str,
+    end: &str,
+) -> Result<(), sqlx::Error> {
     let (staff, org, service) = ids;
     sqlx::query(
         "insert into bookings (org_id, service_id, staff_id, customer_name, customer_email, starts_at, ends_at)
@@ -32,9 +37,13 @@ async fn book(db: &PgPool, ids: (Uuid, Uuid, Uuid), start: &str, end: &str) -> R
 #[sqlx::test]
 async fn overlapping_bookings_are_rejected(db: PgPool) {
     let ids = setup(&db).await;
-    book(&db, ids, "2026-12-01 09:00Z", "2026-12-01 09:30Z").await.unwrap();
+    book(&db, ids, "2026-12-01 09:00Z", "2026-12-01 09:30Z")
+        .await
+        .unwrap();
 
-    let err = book(&db, ids, "2026-12-01 09:15Z", "2026-12-01 09:45Z").await.unwrap_err();
+    let err = book(&db, ids, "2026-12-01 09:15Z", "2026-12-01 09:45Z")
+        .await
+        .unwrap_err();
     let code = err.as_database_error().and_then(|e| e.constraint());
     assert_eq!(code, Some("no_double_booking"));
 }
@@ -42,7 +51,11 @@ async fn overlapping_bookings_are_rejected(db: PgPool) {
 #[sqlx::test]
 async fn back_to_back_bookings_are_fine(db: PgPool) {
     let ids = setup(&db).await;
-    book(&db, ids, "2026-12-01 09:00Z", "2026-12-01 09:30Z").await.unwrap();
+    book(&db, ids, "2026-12-01 09:00Z", "2026-12-01 09:30Z")
+        .await
+        .unwrap();
     // tstzrange is [start, end): ending at 09:30 doesn't overlap starting at 09:30.
-    book(&db, ids, "2026-12-01 09:30Z", "2026-12-01 10:00Z").await.unwrap();
+    book(&db, ids, "2026-12-01 09:30Z", "2026-12-01 10:00Z")
+        .await
+        .unwrap();
 }
