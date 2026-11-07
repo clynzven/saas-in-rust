@@ -9,6 +9,8 @@ use anyhow::{Context, Result};
 pub struct Config {
     /// Address to listen on, e.g. 0.0.0.0:8080 in a container.
     pub bind_addr: SocketAddr,
+    /// postgres://user:password@host/database
+    pub database_url: String,
     /// Public URL of the site, used to build links in emails.
     pub base_url: String,
     /// `json` in production (for log collectors), `pretty` locally.
@@ -26,6 +28,7 @@ impl Config {
         let bind_addr = env_or("BIND_ADDR", "127.0.0.1:3000")
             .parse()
             .context("BIND_ADDR must look like 127.0.0.1:3000")?;
+        let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL is not set")?;
         let base_url = env_or("BASE_URL", "http://localhost:3000")
             .trim_end_matches('/')
             .to_string();
@@ -34,7 +37,7 @@ impl Config {
             "pretty" => LogFormat::Pretty,
             other => anyhow::bail!("LOG_FORMAT must be json or pretty, not {other:?}"),
         };
-        Ok(Self { bind_addr, base_url, log_format })
+        Ok(Self { bind_addr, database_url, base_url, log_format })
     }
 }
 
