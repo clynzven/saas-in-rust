@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select s.name as service_name, b.starts_at, b.customer_email\n           from bookings b join services s on s.id = b.service_id\n          where b.id = $1 and b.org_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "service_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "starts_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "customer_email",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "c8bf937bd231837b91715ba40685e1e13a71904aeeafe15e4c2a49dae9b3b85a"
+}

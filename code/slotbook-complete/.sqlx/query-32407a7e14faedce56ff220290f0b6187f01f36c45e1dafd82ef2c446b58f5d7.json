@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into opening_hours (org_id, weekday, opens, closes) values ($1, $2, '09:00', '17:00')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "32407a7e14faedce56ff220290f0b6187f01f36c45e1dafd82ef2c446b58f5d7"
+}

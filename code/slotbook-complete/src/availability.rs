@@ -46,6 +46,27 @@ pub fn to_utc(tz: Tz, local: NaiveDateTime) -> Option<DateTime<Utc>> {
         .map(|t| t.with_timezone(&Utc))
 }
 
+/// All bookable slots for one day.
+///
+/// ```
+/// use chrono::{NaiveDate, NaiveTime, TimeDelta, Utc};
+/// use slotbook::availability::{slots, Query};
+/// use uuid::Uuid;
+///
+/// let staff = [Uuid::new_v4()];
+/// let q = Query {
+///     date: NaiveDate::from_ymd_opt(2030, 1, 7).unwrap(),
+///     tz: chrono_tz::Pacific::Auckland,
+///     hours: Some((NaiveTime::from_hms_opt(9, 0, 0).unwrap(), NaiveTime::from_hms_opt(10, 0, 0).unwrap())),
+///     duration: TimeDelta::minutes(30),
+///     step: TimeDelta::minutes(15),
+///     not_before: Utc::now(),
+///     staff: &staff,
+///     busy: &[],
+/// };
+/// // 9:00, 9:15 and 9:30 all finish by 10:00.
+/// assert_eq!(slots(&q).len(), 3);
+/// ```
 pub fn slots(q: &Query) -> Vec<Slot> {
     let Some((opens, closes)) = q.hours else {
         return vec![];

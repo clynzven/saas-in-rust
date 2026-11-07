@@ -6,6 +6,15 @@ rust-version = "1.85"
 description = "Online booking for small businesses"
 license = "MIT"
 publish = false
+default-run = "slotbook"
+
+[[bin]]
+name = "slotbook"
+path = "src/main.rs"
+
+[[bin]]
+name = "seed"
+path = "src/bin/seed.rs"
 
 [dependencies]
 anyhow = "1"

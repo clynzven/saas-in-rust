@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select b.id, b.starts_at, s.name as service, u.name as staff, b.customer_name, b.customer_email, b.status,\n                b.starts_at > now() as \"upcoming!\"\n           from bookings b join services s on s.id = b.service_id join users u on u.id = b.staff_id\n          where b.org_id = $1 and b.ends_at > now() - interval '1 day'\n          order by b.starts_at\n          limit 200",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "starts_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "service",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "staff",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "customer_name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "customer_email",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "upcoming!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "452ca0178b721e8f466a97c8b7250dfc3ba4e566ee30c02305c1a44b04de6791"
+}
