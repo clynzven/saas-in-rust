@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "delete from jobs\n          where done_at < now() - interval '30 days'\n             or (done_at is null and attempts >= $1 and run_at < now() - interval '30 days')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6fdbde8af16da4c4dd70417fbc1b4213015a270b48d3bff74e3e291942928be3"
+}

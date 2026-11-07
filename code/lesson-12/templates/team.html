@@ -1,0 +1,26 @@
+{% extends "org.html" %}
+{% block title %}Team · {{ org.name }}{% endblock %}
+{% block page %}
+<h1>Team</h1>
+<p class="lead">Everyone on the team can take bookings.</p>
+{% if let Some(e) = error %}<div class="flash error">{{ e }}</div>{% endif %}
+<table>
+  <tr><th>Name</th><th>Email</th><th>Role</th><th></th></tr>
+  {% for m in members %}
+  <tr>
+    <td>{{ m.name }}</td><td>{{ m.email }}</td>
+    <td><span class="pill">{% if m.role == Role::Owner %}owner{% else %}staff{% endif %}</span></td>
+    <td>{% if org.is_owner() && m.role == Role::Staff %}
+      <form method="post" action="/app/{{ org.slug }}/team/{{ m.user_id }}/remove" class="inline"><button class="ghost">Remove</button></form>
+    {% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% if org.is_owner() %}
+<h2>Add a team member</h2>
+<form class="stack" method="post" action="/app/{{ org.slug }}/team">
+  <label>Their email <input name="email" type="email" required></label>
+  <button>Add as staff</button>
+</form>
+{% endif %}
+{% endblock %}

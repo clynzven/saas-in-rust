@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select staff_id, starts_at as start, ends_at as end from bookings\n          where org_id = $1 and status = 'confirmed' and starts_at < $3 and ends_at > $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "staff_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "start",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "end",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1e8eb1c0180dca436727c9aa63328c19ad7655719911871c02634ccdff1d5171"
+}

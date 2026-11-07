@@ -20,7 +20,7 @@
     <label>Length
       <select name="duration_minutes">{% for d in durations %}<option value="{{ d }}">{{ d }} minutes</option>{% endfor %}</select>
     </label>
-    <label>Price (NZD) <input name="price" required inputmode="decimal" placeholder="35.00"></label>
+    <label>Price <input name="price" required inputmode="decimal" placeholder="35.00"></label>
     <button>Add service</button>
   </form>
   {% endif %}

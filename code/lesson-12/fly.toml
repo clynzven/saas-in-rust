@@ -1,0 +1,31 @@
+# Fly.io configuration. Create the app with `fly launch --no-deploy`,
+# then see docs/deploy.md for secrets and the database.
+app = "slotbook-demo"
+primary_region = "syd"
+kill_signal = "SIGTERM"
+kill_timeout = "30s"
+
+[build]
+
+[env]
+  TRUSTED_IP_HEADER = "Fly-Client-IP"
+  BASE_URL = "https://slotbook-demo.fly.dev"
+  DATABASE_MAX_CONNECTIONS = "10"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "15s"
+    method = "GET"
+    path = "/ready"
+    timeout = "3s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

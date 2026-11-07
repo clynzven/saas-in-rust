@@ -1,0 +1,37 @@
+# Everything you need locally: `docker compose up --build`, then open
+# http://localhost:8080 (the app) and http://localhost:8025 (caught emails).
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: slotbook
+      POSTGRES_DB: slotbook
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      retries: 30
+
+  mail:
+    # Catches every email so nothing reaches real inboxes in development.
+    image: axllent/mailpit:v1.21
+    ports:
+      - "8025:8025"
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://postgres:slotbook@db/slotbook
+      BASE_URL: http://localhost:8080
+      SMTP_URL: smtp://mail:1025
+      MAIL_FROM: Slotbook <bookings@slotbook.local>
+    ports:
+      - "8080:8080"
+    stop_grace_period: 30s
+
+volumes:
+  pgdata:

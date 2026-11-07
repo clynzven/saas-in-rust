@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select id, name, duration_minutes, price_cents, active\n           from services where org_id = $1 order by active desc, name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "duration_minutes",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
+        "name": "price_cents",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "active",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "2dff7f0adb7b05a90f8b52a949bb8fb89eee943cce482c7c4626b4d8288cf483"
+}

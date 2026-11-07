@@ -1,0 +1,8 @@
+{% extends "public.html" %}
+{% block title %}Booked · {{ org.name }}{% endblock %}
+{% block content %}
+<div class="flash ok">You're booked in.</div>
+<h1>{{ service_name }} at {{ org.name }}</h1>
+<p class="lead">{{ when }}</p>
+<p>A confirmation is on its way to {{ email }}.</p>
+{% endblock %}

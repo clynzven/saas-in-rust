@@ -45,3 +45,5 @@ footer { color: var(--muted); font-size: 14px; padding: 24px 0 40px; }
 @media (max-width: 600px) { h1 { font-size: 28px; } nav { gap: 10px; } }
 form.inline { display: inline; }
 .crumbs a { color: var(--muted); }
+a.card { display: block; text-decoration: none; color: var(--ink); transition: border-color .15s, box-shadow .15s; }
+a.card:hover { border-color: var(--brand); box-shadow: 0 4px 16px rgba(47, 111, 98, .12); }

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into memberships (org_id, user_id, role) values ($1, $2, $3::text::member_role)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "89cf94eb59725a951abb49744bea846d97bcb7b5eeba2fc25926666d5f4b18b7"
+}

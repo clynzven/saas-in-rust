@@ -1,0 +1,28 @@
+{% extends "public.html" %}
+{% block title %}{{ service.name }} · {{ org.name }}{% endblock %}
+{% block content %}
+<p class="muted"><a href="/b/{{ org.slug }}">{{ org.name }}</a></p>
+<h1>{{ service.name }}</h1>
+<p class="lead">{{ service.duration_minutes }} minutes · {{ service.price() }}</p>
+<form class="stack" method="get" action="/b/{{ org.slug }}/{{ service.id }}">
+  <label>Day
+    <input type="date" name="date" value="{{ date }}" min="{{ min_date }}" max="{{ max_date }}"
+           hx-get="/b/{{ org.slug }}/{{ service.id }}" hx-target="#slots" hx-swap="outerHTML" hx-trigger="change">
+  </label>
+  <noscript><button>Show times</button></noscript>
+</form>
+{% block slots %}
+<div id="slots" class="card">
+  <h2>Times on {{ date.format("%A %-d %B") }}</h2>
+  <div class="slots">
+  {% for s in slots %}
+    <form method="get" action="/b/{{ org.slug }}/{{ service.id }}/book" class="inline">
+      <input type="hidden" name="start" value="{{ s.start }}"><button>{{ s.label }}</button>
+    </form>
+  {% else %}
+    <p class="muted">No free times this day. Try another day.</p>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}
+{% endblock %}

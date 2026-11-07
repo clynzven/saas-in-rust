@@ -1,0 +1,16 @@
+{% extends "public.html" %}
+{% block title %}Book with {{ org.name }}{% endblock %}
+{% block content %}
+<h1>{{ org.name }}</h1>
+<p class="lead">Choose a service to see available times.</p>
+<div class="grid">
+{% for s in services %}
+  <a class="card" href="/b/{{ org.slug }}/{{ s.id }}">
+    <strong>{{ s.name }}</strong><br>
+    <span class="muted">{{ s.duration_minutes }} min · {{ s.price() }}</span>
+  </a>
+{% else %}
+  <p class="muted">{{ org.name }} isn't taking online bookings yet.</p>
+{% endfor %}
+</div>
+{% endblock %}
