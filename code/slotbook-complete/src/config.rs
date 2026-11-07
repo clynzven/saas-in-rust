@@ -11,6 +11,8 @@ pub struct Config {
     pub bind_addr: SocketAddr,
     /// postgres://user:password@host/database
     pub database_url: String,
+    /// Connections in the pool. Keep the total across instances under Postgres's limit.
+    pub database_max_connections: u32,
     /// Public URL of the site, used to build links in emails.
     pub base_url: String,
     /// `json` in production (for log collectors), `pretty` locally.
@@ -34,6 +36,9 @@ impl Config {
             .parse()
             .context("BIND_ADDR must look like 127.0.0.1:3000")?;
         let database_url = std::env::var("DATABASE_URL").context("DATABASE_URL is not set")?;
+        let database_max_connections = env_or("DATABASE_MAX_CONNECTIONS", "10")
+            .parse()
+            .context("DATABASE_MAX_CONNECTIONS must be a number")?;
         let base_url = env_or("BASE_URL", "http://localhost:3000")
             .trim_end_matches('/')
             .to_string();
@@ -42,6 +47,10 @@ impl Config {
             "pretty" => LogFormat::Pretty,
             other => anyhow::bail!("LOG_FORMAT must be json or pretty, not {other:?}"),
         };
+        // Fail at startup, not on the first email: links need an absolute URL.
+        if !(base_url.starts_with("http://") || base_url.starts_with("https://")) {
+            anyhow::bail!("BASE_URL must start with http:// or https://");
+        }
         let smtp_url = std::env::var("SMTP_URL").ok().filter(|s| !s.is_empty());
         check_mail(&base_url, smtp_url.as_deref())?;
         let mail_from = env_or("MAIL_FROM", "Slotbook <bookings@localhost>");
@@ -51,6 +60,7 @@ impl Config {
         Ok(Self {
             bind_addr,
             database_url,
+            database_max_connections,
             base_url,
             log_format,
             trusted_ip_header,

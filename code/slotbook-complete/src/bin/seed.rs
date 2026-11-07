@@ -12,7 +12,7 @@ const PASSWORD: &str = "demo password 123";
 #[tokio::main]
 async fn main() -> Result<()> {
     let url = std::env::var("DATABASE_URL")?;
-    let pool = db::connect(&url).await?;
+    let pool = db::connect(&url, 2).await?;
     db::migrate(&pool).await?;
 
     if sqlx::query_scalar!("select id from organizations where slug = 'kape-barbers'")

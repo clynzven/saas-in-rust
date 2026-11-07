@@ -1,0 +1,15 @@
+{% extends "public.html" %}
+{% block title %}Confirm booking · {{ org.name }}{% endblock %}
+{% block content %}
+<p class="muted"><a href="/b/{{ org.slug }}/{{ service.id }}">Back to times</a></p>
+<h1>{{ service.name }}</h1>
+<p class="lead">{{ when }} · {{ service.duration_minutes }} min · {{ service.price() }}</p>
+{% if let Some(e) = error %}<div class="flash error">{{ e }}</div>{% endif %}
+<form class="stack" method="post" action="/b/{{ org.slug }}/{{ service.id }}/book">
+  <input type="hidden" name="start" value="{{ start }}">
+  <label>Your name <input name="name" value="{{ name }}" required maxlength="80" autocomplete="name"></label>
+  <label>Email <input name="email" type="email" value="{{ email }}" required autocomplete="email">
+    <span class="muted">We'll send your confirmation here.</span></label>
+  <button>Confirm booking</button>
+</form>
+{% endblock %}

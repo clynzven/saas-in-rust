@@ -36,6 +36,7 @@ pub fn config() -> Config {
     Config {
         bind_addr: "127.0.0.1:0".parse().unwrap(),
         database_url: String::new(),
+        database_max_connections: 5,
         base_url: "http://localhost:3000".into(),
         log_format: LogFormat::Pretty,
         trusted_ip_header: None,

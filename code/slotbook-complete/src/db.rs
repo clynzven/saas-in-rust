@@ -6,9 +6,9 @@ use anyhow::{Context, Result};
 use sqlx::PgPool;
 use sqlx::postgres::PgPoolOptions;
 
-pub async fn connect(url: &str) -> Result<PgPool> {
+pub async fn connect(url: &str, max_connections: u32) -> Result<PgPool> {
     PgPoolOptions::new()
-        .max_connections(10)
+        .max_connections(max_connections)
         // Fail fast instead of hanging a request when the pool is exhausted.
         .acquire_timeout(Duration::from_secs(5))
         .connect(url)

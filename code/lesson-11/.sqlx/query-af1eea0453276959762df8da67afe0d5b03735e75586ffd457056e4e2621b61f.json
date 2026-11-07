@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select weekday, opens, closes from opening_hours where org_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "weekday",
+        "type_info": "Int2"
+      },
+      {
+        "ordinal": 1,
+        "name": "opens",
+        "type_info": "Time"
+      },
+      {
+        "ordinal": 2,
+        "name": "closes",
+        "type_info": "Time"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "af1eea0453276959762df8da67afe0d5b03735e75586ffd457056e4e2621b61f"
+}

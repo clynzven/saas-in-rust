@@ -109,10 +109,37 @@ pub async fn run_due(state: &AppState) -> Result<usize> {
     Ok(claimed.len())
 }
 
+/// Routine cleanup: expired sessions and old finished jobs.
+pub async fn housekeeping(db: &sqlx::PgPool) -> Result<(u64, u64)> {
+    let sessions = sqlx::query!("delete from sessions where expires_at < now()")
+        .execute(db)
+        .await?
+        .rows_affected();
+    // Finished jobs, and jobs that gave up, once they're a month old.
+    let jobs = sqlx::query!(
+        "delete from jobs
+          where done_at < now() - interval '30 days'
+             or (done_at is null and attempts >= $1 and run_at < now() - interval '30 days')",
+        MAX_ATTEMPTS,
+    )
+    .execute(db)
+    .await?
+    .rows_affected();
+    Ok((sessions, jobs))
+}
+
 /// Poll for work until `shutdown` is cancelled.
 pub async fn worker(state: AppState, shutdown: CancellationToken) {
     tracing::info!("job worker started");
+    let mut last_cleanup = std::time::Instant::now() - Duration::from_secs(3600);
     loop {
+        if last_cleanup.elapsed() > Duration::from_secs(600) {
+            match housekeeping(&state.db).await {
+                Ok((s, j)) => tracing::info!(expired_sessions = s, old_jobs = j, "housekeeping"),
+                Err(e) => tracing::warn!(error = %e, "housekeeping failed"),
+            }
+            last_cleanup = std::time::Instant::now();
+        }
         let idle = match run_due(&state).await {
             Ok(n) => n == 0,
             Err(e) => {

@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "insert into organizations (name, slug, timezone)\n         values ('Kape Barbers', 'kape-barbers', 'Pacific/Auckland') returning id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a2e713cb03a4c7a26dfa138d1fcb347499ddd7feb031b0bc8e19223a0ab22696"
+}

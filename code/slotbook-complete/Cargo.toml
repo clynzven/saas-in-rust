@@ -26,7 +26,7 @@ sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio",
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal"] }
-tower-http = { version = "0.6", features = ["trace", "fs"] }
+tower-http = { version = "0.6", features = ["trace", "fs", "timeout", "limit", "request-id", "catch-panic", "compression-gzip", "compression-br", "set-header", "util"] }
 thiserror = "2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
@@ -38,6 +38,7 @@ axum-extra = { version = "0.12.6", features = ["cookie"] }
 time = "0.3"
 lettre = { version = "0.11", default-features = false, features = ["builder", "smtp-transport", "pool", "hostname", "tokio1-rustls-tls"] }
 tokio-util = "0.7"
+tower = { version = "0.5", features = ["util"] }
 
 [profile.dev]
 debug = "line-tables-only"
