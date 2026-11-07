@@ -15,6 +15,8 @@ pub struct Config {
     pub base_url: String,
     /// `json` in production (for log collectors), `pretty` locally.
     pub log_format: LogFormat,
+    /// Header a trusted proxy sets to the visitor's IP (e.g. Fly-Client-IP); unset without a proxy.
+    pub trusted_ip_header: Option<String>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -37,11 +39,15 @@ impl Config {
             "pretty" => LogFormat::Pretty,
             other => anyhow::bail!("LOG_FORMAT must be json or pretty, not {other:?}"),
         };
+        let trusted_ip_header = std::env::var("TRUSTED_IP_HEADER")
+            .ok()
+            .filter(|s| !s.is_empty());
         Ok(Self {
             bind_addr,
             database_url,
             base_url,
             log_format,
+            trusted_ip_header,
         })
     }
 }

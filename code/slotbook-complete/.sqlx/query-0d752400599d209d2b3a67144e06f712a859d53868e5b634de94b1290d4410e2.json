@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "select u.id as user_id, u.name, u.email, m.role as \"role: Role\"\n             from memberships m join users u on u.id = m.user_id\n            where m.org_id = $1\n            order by m.role, u.name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "email",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "role: Role",
+        "type_info": {
+          "Custom": {
+            "name": "member_role",
+            "kind": {
+              "Enum": [
+                "owner",
+                "staff"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0d752400599d209d2b3a67144e06f712a859d53868e5b634de94b1290d4410e2"
+}

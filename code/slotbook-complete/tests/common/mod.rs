@@ -1,8 +1,6 @@
 //! A tiny test client: build the real app on a fresh database and send it requests.
 #![allow(dead_code)]
 
-use std::sync::Arc;
-
 use axum::Router;
 use axum::body::Body;
 use axum::http::{Request, StatusCode, header};
@@ -38,15 +36,13 @@ pub fn config() -> Config {
         database_url: String::new(),
         base_url: "http://localhost:3000".into(),
         log_format: LogFormat::Pretty,
+        trusted_ip_header: None,
     }
 }
 
 impl TestApp {
     pub fn new(db: PgPool) -> Self {
-        let state = AppState {
-            db: db.clone(),
-            config: Arc::new(config()),
-        };
+        let state = AppState::new(db.clone(), config());
         Self {
             router: slotbook::app(state),
             db,

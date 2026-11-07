@@ -12,6 +12,7 @@ use crate::AppState;
 use crate::auth::{self, CurrentUser};
 use crate::error::AppResult;
 use crate::forms;
+use crate::security::ClientIp;
 use crate::web::render;
 
 #[derive(Template, Default)]
@@ -38,9 +39,20 @@ pub async fn signup_page(user: Option<CurrentUser>) -> AppResult<Response> {
 
 pub async fn signup(
     State(state): State<AppState>,
+    ClientIp(ip): ClientIp,
     jar: CookieJar,
     Form(f): Form<SignupForm>,
 ) -> AppResult<Response> {
+    // Before any work: hashing a password is slow on purpose, so a flood of
+    // sign-ups would keep the server busy.
+    if !state.ip_limiter.allow(&format!("signup {ip}")) {
+        let page = SignupPage {
+            error: Some("Too many sign-ups from your network. Please try again later.".into()),
+            name: f.name,
+            email: f.email,
+        };
+        return Ok((StatusCode::TOO_MANY_REQUESTS, render(page)?).into_response());
+    }
     let again = |error: String| -> AppResult<Response> {
         let page = SignupPage {
             error: Some(error),
@@ -105,10 +117,21 @@ pub async fn login_page(user: Option<CurrentUser>) -> AppResult<Response> {
 
 pub async fn login(
     State(state): State<AppState>,
+    ClientIp(ip): ClientIp,
     jar: CookieJar,
     Form(f): Form<LoginForm>,
 ) -> AppResult<Response> {
     let email = f.email.trim().to_lowercase();
+    // Count per network AND email, so guessing someone's password from one
+    // place doesn't lock them out everywhere; plus a cap per network.
+    let key = format!("{ip} {email}");
+    if !state.ip_limiter.allow(&format!("login {ip}")) || !state.login_limiter.allow(&key) {
+        let page = LoginPage {
+            error: Some("Too many attempts. Please wait 15 minutes and try again.".into()),
+            email: f.email,
+        };
+        return Ok((StatusCode::TOO_MANY_REQUESTS, render(page)?).into_response());
+    }
     let row = sqlx::query!(
         "select id, password_hash from users where lower(email) = $1",
         email
@@ -121,6 +144,7 @@ pub async fn login(
     };
     match (auth::verify(f.password, hash).await?, id) {
         (true, Some(user_id)) => {
+            state.login_limiter.reset(&key);
             let jar = auth::start_session(&state, user_id, jar).await?;
             Ok((jar, Redirect::to("/dashboard")).into_response())
         }

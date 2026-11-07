@@ -7,12 +7,15 @@ mod dashboard;
 pub mod db;
 pub mod error;
 pub mod forms;
+mod orgs;
 mod pages;
+pub mod security;
 pub mod state;
 pub mod web;
 
 use axum::extract::State;
 use axum::http::StatusCode;
+use axum::middleware;
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde_json::{Value, json};
@@ -29,10 +32,23 @@ pub fn app(state: AppState) -> Router {
         .route("/login", get(accounts::login_page).post(accounts::login))
         .route("/logout", post(accounts::logout))
         .route("/dashboard", get(dashboard::dashboard))
+        .route("/orgs/new", get(orgs::new_page))
+        .route("/orgs", post(orgs::create))
+        .route("/app/{slug}", get(orgs::home))
+        .route("/app/{slug}/team", get(orgs::team).post(orgs::add_member))
+        .route(
+            "/app/{slug}/team/{user_id}/remove",
+            post(orgs::remove_member),
+        )
         .route("/health", get(health))
         .route("/ready", get(ready))
         .nest_service("/static", ServeDir::new(static_dir()))
         .fallback(pages::not_found)
+        .layer(middleware::from_fn_with_state(
+            state.clone(),
+            security::same_origin_only,
+        ))
+        .layer(middleware::from_fn(security::headers))
         .layer(TraceLayer::new_for_http())
         .with_state(state)
 }

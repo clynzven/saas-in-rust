@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use anyhow::Result;
 use slotbook::config::{Config, LogFormat};
 use slotbook::{AppState, db};
@@ -14,13 +12,14 @@ async fn main() -> Result<()> {
     db::migrate(&pool).await?;
     tracing::info!("database migrated");
 
-    let state = AppState {
-        db: pool,
-        config: Arc::new(config.clone()),
-    };
+    let state = AppState::new(pool, config.clone());
     let listener = tokio::net::TcpListener::bind(config.bind_addr).await?;
     tracing::info!(addr = %config.bind_addr, "listening");
-    axum::serve(listener, slotbook::app(state)).await?;
+    axum::serve(
+        listener,
+        slotbook::app(state).into_make_service_with_connect_info::<std::net::SocketAddr>(),
+    )
+    .await?;
     Ok(())
 }
 

@@ -43,3 +43,5 @@ th { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: v
 .htmx-request { opacity: .6; transition: opacity .2s; }
 footer { color: var(--muted); font-size: 14px; padding: 24px 0 40px; }
 @media (max-width: 600px) { h1 { font-size: 28px; } nav { gap: 10px; } }
+form.inline { display: inline; }
+.crumbs a { color: var(--muted); }
