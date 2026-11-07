@@ -2,6 +2,7 @@
 
 mod accounts;
 pub mod auth;
+pub mod availability;
 mod catalog;
 pub mod config;
 mod dashboard;

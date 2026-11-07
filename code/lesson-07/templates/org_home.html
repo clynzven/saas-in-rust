@@ -1,0 +1,6 @@
+{% extends "org.html" %}
+{% block title %}{{ org.name }} · Slotbook{% endblock %}
+{% block page %}
+<h1>{{ org.name }}</h1>
+<p class="lead">Time zone: {{ org.timezone }} · {{ members }} team member{% if members != 1 %}s{% endif %}</p>
+{% endblock %}

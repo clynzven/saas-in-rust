@@ -36,5 +36,6 @@ opt-level = 1
 
 [dev-dependencies]
 http-body-util = "0.1"
+proptest = "1"
 serde_urlencoded = "0.7"
 tower = { version = "0.5", features = ["util"] }
