@@ -3,7 +3,7 @@
 
 use askama::Template;
 use axum::http::StatusCode;
-use axum::response::{Html, IntoResponse, Response};
+use axum::response::{Html, IntoResponse, Redirect, Response};
 
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {
@@ -47,6 +47,10 @@ struct ErrorPage<'a> {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
+        if let AppError::Unauthorized = self {
+            // Pages that need a login send visitors to the login form.
+            return Redirect::to("/login").into_response();
+        }
         let (status, title) = match &self {
             AppError::NotFound => (StatusCode::NOT_FOUND, "Page not found"),
             AppError::Unauthorized => (StatusCode::UNAUTHORIZED, "Please log in"),

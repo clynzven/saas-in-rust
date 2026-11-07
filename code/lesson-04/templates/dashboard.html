@@ -1,0 +1,15 @@
+{% extends "app.html" %}
+{% block title %}Dashboard · Slotbook{% endblock %}
+{% block content %}
+<h1>Hi, {{ user.name }}</h1>
+{% if orgs.is_empty() %}
+  <p class="lead">You're not part of a business yet.</p>
+{% else %}
+  <h2>Your businesses</h2>
+  <div class="grid">
+  {% for o in orgs %}
+    <a class="card" href="/app/{{ o.slug }}"><strong>{{ o.name }}</strong><br><span class="pill">{{ o.role }}</span></a>
+  {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

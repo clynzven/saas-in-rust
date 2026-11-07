@@ -1,15 +1,20 @@
 //! Slotbook: online booking for small businesses.
 
+mod accounts;
+pub mod auth;
 pub mod config;
+mod dashboard;
 pub mod db;
 pub mod error;
+pub mod forms;
 mod pages;
 pub mod state;
 pub mod web;
 
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::{Json, Router, routing::get};
+use axum::routing::{get, post};
+use axum::{Json, Router};
 use serde_json::{Value, json};
 use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
@@ -20,6 +25,10 @@ pub use state::AppState;
 pub fn app(state: AppState) -> Router {
     Router::new()
         .route("/", get(pages::home))
+        .route("/signup", get(accounts::signup_page).post(accounts::signup))
+        .route("/login", get(accounts::login_page).post(accounts::login))
+        .route("/logout", post(accounts::logout))
+        .route("/dashboard", get(dashboard::dashboard))
         .route("/health", get(health))
         .route("/ready", get(ready))
         .nest_service("/static", ServeDir::new(static_dir()))

@@ -21,6 +21,12 @@ tower-http = { version = "0.6", features = ["trace", "fs"] }
 thiserror = "2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+argon2 = "0.5"
+sha2 = "0.10"
+base64 = "0.22"
+chrono-tz = "0.10"
+axum-extra = { version = "0.12.6", features = ["cookie"] }
+time = "0.3"
 
 [profile.dev]
 debug = "line-tables-only"
@@ -30,4 +36,5 @@ opt-level = 1
 
 [dev-dependencies]
 http-body-util = "0.1"
+serde_urlencoded = "0.7"
 tower = { version = "0.5", features = ["util"] }

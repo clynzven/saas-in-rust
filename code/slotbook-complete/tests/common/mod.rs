@@ -70,3 +70,63 @@ impl TestApp {
             .await
     }
 }
+
+impl TestApp {
+    pub async fn post_form(
+        &self,
+        path: &str,
+        form: &[(&str, &str)],
+        cookie: Option<&str>,
+    ) -> TestResponse {
+        let body = serde_urlencoded::to_string(form).unwrap();
+        let mut req = Request::post(path)
+            .header(header::CONTENT_TYPE, "application/x-www-form-urlencoded")
+            .header(header::ORIGIN, "http://localhost:3000");
+        if let Some(c) = cookie {
+            req = req.header(header::COOKIE, c);
+        }
+        self.send(req.body(Body::from(body)).unwrap()).await
+    }
+
+    pub async fn get_as(&self, path: &str, cookie: &str) -> TestResponse {
+        self.send(
+            Request::get(path)
+                .header(header::COOKIE, cookie)
+                .body(Body::empty())
+                .unwrap(),
+        )
+        .await
+    }
+
+    /// Sign up a new user and return their session cookie ("sb_session=...").
+    pub async fn signup(&self, name: &str, email: &str) -> String {
+        let res = self
+            .post_form(
+                "/signup",
+                &[
+                    ("name", name),
+                    ("email", email),
+                    ("password", "correct horse battery"),
+                ],
+                None,
+            )
+            .await;
+        assert_eq!(
+            res.status,
+            StatusCode::SEE_OTHER,
+            "signup failed: {}",
+            res.body
+        );
+        session_cookie(&res)
+    }
+}
+
+pub fn session_cookie(res: &TestResponse) -> String {
+    let set = res
+        .headers
+        .get(header::SET_COOKIE)
+        .expect("a Set-Cookie header")
+        .to_str()
+        .unwrap();
+    set.split(';').next().unwrap().to_string()
+}
